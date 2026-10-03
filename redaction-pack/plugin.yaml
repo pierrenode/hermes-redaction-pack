@@ -1,0 +1,5 @@
+name: redaction-pack
+version: "1.0.0"
+description: "Teaches Hermes's secret redactor 42 more vendor credential formats (Vault, Doppler, Bedrock, Grafana, Sentry, Shopify, Postman and others) through register_redaction_patterns. Pattern-only: no tools, hooks, network, files or subprocesses."
+author: pierrenode
+requires_hermes: ">=0.21"

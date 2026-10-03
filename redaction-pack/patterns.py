@@ -1,0 +1,164 @@
+"""Credential formats this pack adds to Hermes's secret redactor.
+
+Every entry is a vendor-prefixed token shape that ``agent.redact`` does not
+mask on its own. Hermes joins all prefix patterns into one alternation wrapped
+in ``(?<![A-Za-z0-9_-])(...)(?![A-Za-z0-9_-])``, so each pattern here:
+
+* starts with a literal vendor prefix of at least two characters (Hermes uses
+  that prefix as a cheap substring gate before running the regex);
+* has no top-level ``|``, no capturing group, no inline flag and no nested
+  unbounded repeat (Hermes refuses those shapes at registration);
+* spells out case with character classes instead of ``(?i)``.
+
+``source`` names where the format comes from: a gitleaks rule id
+(https://github.com/gitleaks/gitleaks, MIT) or the vendor's own documentation.
+"""
+
+from __future__ import annotations
+
+from typing import NamedTuple
+
+
+class TokenFormat(NamedTuple):
+    vendor: str
+    token: str
+    pattern: str
+    source: str
+
+
+FORMATS: tuple[TokenFormat, ...] = (
+    # Secrets managers and encryption keys
+    TokenFormat("1Password", "account Secret Key",
+                r"A3-[A-Z0-9]{6}-(?:[A-Z0-9]{11}|[A-Z0-9]{6}-[A-Z0-9]{5})-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}",
+                "gitleaks:1password-secret-key"),
+    TokenFormat("HashiCorp Vault", "service token",
+                r"hvs\.[A-Za-z0-9_-]{90,120}",
+                "gitleaks:vault-service-token"),
+    TokenFormat("HashiCorp Vault", "batch token",
+                r"hvb\.[A-Za-z0-9_-]{138,300}",
+                "gitleaks:vault-batch-token"),
+    TokenFormat("Doppler", "CLI, personal, service account, SCIM and audit tokens",
+                r"dp\.(?:ct|pt|sa|said|scim|audit)\.[A-Za-z0-9]{40,44}",
+                "https://docs.doppler.com/reference/auth-token-formats"),
+    TokenFormat("Doppler", "service token",
+                r"dp\.st\.(?:[a-z0-9_-]{2,35}\.)?[A-Za-z0-9]{40,44}",
+                "https://docs.doppler.com/reference/auth-token-formats"),
+    # Cloud and infrastructure
+    TokenFormat("Amazon Bedrock", "long-term API key",
+                r"ABSK[A-Za-z0-9+/]{109,269}={0,2}",
+                "gitleaks:aws-amazon-bedrock-api-key-long-lived"),
+    TokenFormat("Amazon Bedrock", "short-term API key",
+                r"bedrock-api-key-YmVkcm9jay5hbWF6b25hd3MuY29t[A-Za-z0-9+/]{20,}={0,2}",
+                "gitleaks:aws-amazon-bedrock-api-key-short-lived"),
+    TokenFormat("Alibaba Cloud", "AccessKey ID",
+                r"LTAI[A-Za-z0-9]{20}",
+                "gitleaks:alibaba-access-key-id"),
+    TokenFormat("DigitalOcean", "OAuth refresh token",
+                r"dor_v1_[a-f0-9]{64}",
+                "gitleaks:digitalocean-refresh-token"),
+    TokenFormat("Fly.io", "access token",
+                r"fo1_[A-Za-z0-9_-]{43}",
+                "gitleaks:flyio-access-token"),
+    TokenFormat("Fly.io", "macaroon token",
+                r"fm1[ar]_[A-Za-z0-9+/]{100,}={0,3}",
+                "gitleaks:flyio-access-token"),
+    TokenFormat("Fly.io", "macaroon token (v2)",
+                r"fm2_[A-Za-z0-9+/]{100,}={0,3}",
+                "gitleaks:flyio-access-token"),
+    TokenFormat("Heroku", "API key",
+                r"HRKU-AA[A-Za-z0-9_-]{58}",
+                "gitleaks:heroku-api-key-v2"),
+    TokenFormat("OpenShift", "user token",
+                r"sha256~[A-Za-z0-9_-]{43}",
+                "gitleaks:openshift-user-token"),
+    TokenFormat("Scalingo", "API token",
+                r"tk-us-[A-Za-z0-9_-]{48}",
+                "gitleaks:scalingo-api-token"),
+    TokenFormat("Pulumi", "access token",
+                r"pul-[a-f0-9]{40}",
+                "gitleaks:pulumi-api-token"),
+    TokenFormat("Infracost", "API key",
+                r"ico-[A-Za-z0-9]{32}",
+                "gitleaks:infracost-api-token"),
+    TokenFormat("Databricks", "personal access token",
+                r"dapi[a-f0-9]{32}(?:-[0-9])?",
+                "gitleaks:databricks-api-token"),
+    TokenFormat("PlanetScale", "service token, OAuth token and password",
+                r"pscale_(?:tkn|oauth|pw)_[A-Za-z0-9_.=-]{32,64}",
+                "gitleaks:planetscale-api-token, planetscale-oauth-token, planetscale-password"),
+    # Model platforms
+    TokenFormat("Hugging Face", "organization API token",
+                r"api_org_[A-Za-z]{34}",
+                "gitleaks:huggingface-organization-api-token"),
+    # Observability
+    TokenFormat("Grafana", "Cloud API token",
+                r"glc_[A-Za-z0-9+/]{32,400}={0,3}",
+                "gitleaks:grafana-cloud-api-token"),
+    TokenFormat("Grafana", "service account token",
+                r"glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}",
+                "gitleaks:grafana-service-account-token"),
+    TokenFormat("Sentry", "user auth token",
+                r"sntryu_[a-f0-9]{64}",
+                "gitleaks:sentry-user-token"),
+    TokenFormat("Sentry", "organization auth token",
+                r"sntrys_eyJ[A-Za-z0-9+/]{30,400}={0,2}_[A-Za-z0-9+/]{43}",
+                "gitleaks:sentry-org-token"),
+    TokenFormat("Dynatrace", "API token",
+                r"dt0c01\.[A-Za-z0-9]{24}\.[A-Za-z0-9]{64}",
+                "gitleaks:dynatrace-api-token"),
+    TokenFormat("New Relic", "user API key",
+                r"NRAK-[A-Za-z0-9]{27}",
+                "gitleaks:new-relic-user-api-key"),
+    TokenFormat("New Relic", "insert key",
+                r"NRII-[A-Za-z0-9_-]{32}",
+                "gitleaks:new-relic-insert-key"),
+    # Developer tools and package registries
+    TokenFormat("Postman", "API key",
+                r"PMAK-[a-fA-F0-9]{24}-[a-fA-F0-9]{34}",
+                "gitleaks:postman-api-token"),
+    TokenFormat("Sourcegraph", "access token",
+                r"sgp_(?:[a-fA-F0-9]{16}_|local_)?[a-fA-F0-9]{40}",
+                "gitleaks:sourcegraph-access-token"),
+    TokenFormat("Prefect", "API key",
+                r"pnu_[A-Za-z0-9]{36}",
+                "gitleaks:prefect-api-token"),
+    TokenFormat("ReadMe", "API key",
+                r"rdme_[a-z0-9]{70}",
+                "gitleaks:readme-api-token"),
+    TokenFormat("RubyGems", "API key",
+                r"rubygems_[a-f0-9]{48}",
+                "gitleaks:rubygems-api-token"),
+    TokenFormat("Clojars", "deploy token",
+                r"CLOJARS_[A-Za-z0-9]{60}",
+                "gitleaks:clojars-api-token"),
+    TokenFormat("Typeform", "personal access token",
+                r"tfp_[A-Za-z0-9_.=-]{59}",
+                "gitleaks:typeform-api-token"),
+    TokenFormat("Frame.io", "developer token",
+                r"fio-u-[A-Za-z0-9_=-]{64}",
+                "gitleaks:frameio-api-token"),
+    TokenFormat("Slack", "app configuration refresh token",
+                r"xoxe-[0-9]-[A-Za-z0-9]{146}",
+                "gitleaks:slack-config-refresh-token"),
+    # Commerce and messaging APIs
+    TokenFormat("Shopify", "access tokens and shared secret",
+                r"shp(?:at|ca|pa|ss)_[a-fA-F0-9]{32}",
+                "gitleaks:shopify-access-token, -custom-access-token, -private-app-access-token, -shared-secret"),
+    TokenFormat("Square", "access token",
+                r"sq0atp-[A-Za-z0-9_-]{22,60}",
+                "gitleaks:square-access-token"),
+    TokenFormat("Shippo", "API token",
+                r"shippo_(?:live|test)_[a-fA-F0-9]{40}",
+                "gitleaks:shippo-api-token"),
+    TokenFormat("Duffel", "API token",
+                r"duffel_(?:test|live)_[A-Za-z0-9_=-]{43}",
+                "gitleaks:duffel-api-token"),
+    TokenFormat("EasyPost", "production and test API keys",
+                r"EZ[AT]K[A-Za-z0-9]{54}",
+                "gitleaks:easypost-api-token, easypost-test-api-token"),
+    TokenFormat("Brevo", "API key",
+                r"xkeysib-[a-f0-9]{64}-[A-Za-z0-9]{16}",
+                "gitleaks:sendinblue-api-token"),
+)
+
+PATTERNS: tuple[str, ...] = tuple(fmt.pattern for fmt in FORMATS)
