@@ -1,9 +1,9 @@
 # redaction-pack
 
-A Hermes plugin that teaches the built-in secret redactor 45 more vendor
-credential formats: HashiCorp Vault, Doppler, Amazon Bedrock, LangSmith,
-Pinecone, Grafana, Sentry, Shopify, Postman, Databricks and others. It registers regexes and
-nothing else.
+A Hermes plugin that teaches the built-in secret redactor 51 more vendor
+credential formats: HashiCorp Vault, Doppler, Amazon Bedrock, Supabase,
+Tailscale, Docker Hub, LangSmith, Pinecone, Grafana, Sentry, Shopify, Postman,
+Databricks and others. It registers regexes and nothing else.
 
 ## Why
 
@@ -66,6 +66,8 @@ these formats as well as the built-in ones.
 | Infracost | API key | `ico-[A-Za-z0-9]{32}` | gitleaks |
 | Databricks | personal access token | `dapi[a-f0-9]{32}(?:-[0-9])?` | gitleaks |
 | PlanetScale | service token, OAuth token and password | `pscale_(?:tkn\|oauth\|pw)_[A-Za-z0-9_.=-]{32,64}` | gitleaks |
+| Supabase | personal and OAuth access token | `sbp_(?:oauth_\|v0_)?[a-f0-9]{40}` | vendor source |
+| Tailscale | API, auth, OAuth client, SCIM and webhook keys | `tskey-(?:api\|auth\|client\|scim\|webhook)-[A-Za-z0-9_]+-[A-Za-z0-9_]{16,}` | vendor docs |
 | Hugging Face | organization API token | `api_org_[A-Za-z]{34}` | gitleaks |
 | LangSmith | personal access token and service key | `lsv2_(?:pt\|sk)_[a-f0-9]{32}_[a-f0-9]{10}` | trufflehog |
 | Pinecone | API key | `pcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}` | trufflehog |
@@ -85,6 +87,10 @@ these formats as well as the built-in ones.
 | Clojars | deploy token | `CLOJARS_[A-Za-z0-9]{60}` | gitleaks |
 | Typeform | personal access token | `tfp_[A-Za-z0-9_.=-]{59}` | gitleaks |
 | Frame.io | developer token | `fio-u-[A-Za-z0-9_=-]{64}` | gitleaks |
+| Docker Hub | personal access token | `dckr_pat_[A-Za-z0-9_-]{27}` | trufflehog |
+| Docker Hub | organization access token | `dckr_oat_[A-Za-z0-9_-]{32}` | trufflehog |
+| Figma | personal access token | `figd_[A-Za-z0-9_-]{40}` | trufflehog |
+| Figma | personal access token (figp_ format) | `figp_[A-Za-z0-9_=-]{40,54}` | trufflehog |
 | Slack | app configuration refresh token | `xoxe-[0-9]-[A-Za-z0-9]{146}` | gitleaks |
 | Shopify | access tokens and shared secret | `shp(?:at\|ca\|pa\|ss)_[a-fA-F0-9]{32}` | gitleaks |
 | Square | access token | `sq0atp-[A-Za-z0-9_-]{22,60}` | gitleaks |
@@ -97,6 +103,10 @@ these formats as well as the built-in ones.
 [gitleaks](https://github.com/gitleaks/gitleaks) (MIT); `patterns.py` gives the
 rule id for each entry. Doppler's formats are the ones Doppler publishes in
 [Auth Token Formats](https://docs.doppler.com/reference/auth-token-formats).
+Supabase's is the `AccessTokenPattern` the
+[Supabase CLI](https://github.com/supabase/cli) validates tokens against, and
+Tailscale's prefixes are the ones listed in
+[Key prefixes](https://tailscale.com/kb/1277/key-prefixes).
 "trufflehog" means the format follows that
 [TruffleHog](https://github.com/trufflesecurity/trufflehog) detector
 (`pkg/detectors/<name>`). Patterns are rewritten for Hermes's matcher: explicit
@@ -112,6 +122,9 @@ character classes instead of `(?i)`, no capturing groups, no top-level `|`.
   NVIDIA API keys (#28332), Google OAuth tokens (#55467, #117441), 1Password
   service-account tokens (#67438) and chat webhook URLs (#118018). Those belong
   in core.
+- **Formats whose shape no source pins down.** Supabase's newer `sb_secret_`
+  API keys have a documented prefix but no published length or alphabet, so a
+  pattern would be a guess.
 - **Formats without a distinctive literal prefix** (Terraform Cloud, Mailgun
   `key-`, Airtable `pat`). Hermes needs a literal prefix to gate each pattern
   cheaply, and a short common one would run the full matcher on most lines.

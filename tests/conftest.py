@@ -74,6 +74,12 @@ def _samples() -> dict[str, list[str]]:
         r"dapi[a-f0-9]{32}(?:-[0-9])?": ["dapi" + fill(HEX, 32), "dapi" + fill(HEX, 32, 1) + "-2"],
         r"pscale_(?:tkn|oauth|pw)_[A-Za-z0-9_.=-]{32,64}":
             [f"pscale_{kind}_" + fill(ALNUM, 43, i) for i, kind in enumerate(("tkn", "oauth", "pw"))],
+        r"sbp_(?:oauth_|v0_)?[a-f0-9]{40}":
+            ["sbp_" + fill(HEX, 40), "sbp_oauth_" + fill(HEX, 40, 1), "sbp_v0_" + fill(HEX, 40, 2)],
+        r"tskey-(?:api|auth|client|scim|webhook)-[A-Za-z0-9_]+-[A-Za-z0-9_]{16,}":
+            [f"tskey-{kind}-k" + fill(ALNUM, 10, i) + "CNTRL-" + fill(ALNUM, 18 + 5 * i, i + 1)
+             for i, kind in enumerate(("api", "auth", "client", "scim", "webhook"))]
+            + ["tskey-auth-k" + fill(ALNUM, 6, 5) + "_" + fill(ALNUM, 5, 6) + "-" + fill(ALNUM, 9, 7) + "_" + fill(ALNUM, 9, 8)],
         r"api_org_[A-Za-z]{34}": ["api_org_" + fill(LETTERS, 34)],
         r"lsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10}":
             ["lsv2_pt_" + fill(HEX, 32) + "_" + fill(HEX, 10, 1),
@@ -103,6 +109,10 @@ def _samples() -> dict[str, list[str]]:
         r"CLOJARS_[A-Za-z0-9]{60}": ["CLOJARS_" + fill(ALNUM, 60)],
         r"tfp_[A-Za-z0-9_.=-]{59}": ["tfp_" + fill(ALNUM, 59)],
         r"fio-u-[A-Za-z0-9_=-]{64}": ["fio-u-" + fill(URLSAFE, 64)],
+        r"dckr_pat_[A-Za-z0-9_-]{27}": ["dckr_pat_" + fill(ALNUM, 13) + "-_" + fill(ALNUM, 12, 1)],
+        r"dckr_oat_[A-Za-z0-9_-]{32}": ["dckr_oat_" + fill(ALNUM, 15, 2) + "_-" + fill(ALNUM, 15, 3)],
+        r"figd_[A-Za-z0-9_-]{40}": ["figd_" + fill(ALNUM, 19) + "-_" + fill(ALNUM, 19, 1)],
+        r"figp_[A-Za-z0-9_=-]{40,54}": ["figp_" + fill(ALNUM, 42), "figp_" + fill(URLSAFE, 52, 1) + "=="],
         r"xoxe-[0-9]-[A-Za-z0-9]{146}": ["xoxe-1-" + fill(ALNUM, 146)],
         r"shp(?:at|ca|pa|ss)_[a-fA-F0-9]{32}":
             [f"shp{kind}_" + fill(HEX, 32, i) for i, kind in enumerate(("at", "ca", "pa", "ss"))],

@@ -13,7 +13,7 @@ in ``(?<![A-Za-z0-9_-])(...)(?![A-Za-z0-9_-])``, so each pattern here:
 ``source`` names where the format comes from: a gitleaks rule id
 (https://github.com/gitleaks/gitleaks, MIT), a TruffleHog detector
 (https://github.com/trufflesecurity/trufflehog, pkg/detectors/<name>) or the vendor's own
-documentation.
+documentation or source code.
 """
 
 from __future__ import annotations
@@ -88,6 +88,12 @@ FORMATS: tuple[TokenFormat, ...] = (
     TokenFormat("PlanetScale", "service token, OAuth token and password",
                 r"pscale_(?:tkn|oauth|pw)_[A-Za-z0-9_.=-]{32,64}",
                 "gitleaks:planetscale-api-token, planetscale-oauth-token, planetscale-password"),
+    TokenFormat("Supabase", "personal and OAuth access token",
+                r"sbp_(?:oauth_|v0_)?[a-f0-9]{40}",
+                "https://github.com/supabase/cli (AccessTokenPattern, apps/cli-go/internal/utils/access_token.go)"),
+    TokenFormat("Tailscale", "API, auth, OAuth client, SCIM and webhook keys",
+                r"tskey-(?:api|auth|client|scim|webhook)-[A-Za-z0-9_]+-[A-Za-z0-9_]{16,}",
+                "https://tailscale.com/kb/1277/key-prefixes; trufflehog:tailscale"),
     # Model and ML platforms
     TokenFormat("Hugging Face", "organization API token",
                 r"api_org_[A-Za-z]{34}",
@@ -148,6 +154,18 @@ FORMATS: tuple[TokenFormat, ...] = (
     TokenFormat("Frame.io", "developer token",
                 r"fio-u-[A-Za-z0-9_=-]{64}",
                 "gitleaks:frameio-api-token"),
+    TokenFormat("Docker Hub", "personal access token",
+                r"dckr_pat_[A-Za-z0-9_-]{27}",
+                "trufflehog:dockerhub/v2"),
+    TokenFormat("Docker Hub", "organization access token",
+                r"dckr_oat_[A-Za-z0-9_-]{32}",
+                "trufflehog:dockerhub/v2"),
+    TokenFormat("Figma", "personal access token",
+                r"figd_[A-Za-z0-9_-]{40}",
+                "trufflehog:figmapersonalaccesstoken/v2"),
+    TokenFormat("Figma", "personal access token (figp_ format)",
+                r"figp_[A-Za-z0-9_=-]{40,54}",
+                "trufflehog:figmapersonalaccesstoken/v3"),
     TokenFormat("Slack", "app configuration refresh token",
                 r"xoxe-[0-9]-[A-Za-z0-9]{146}",
                 "gitleaks:slack-config-refresh-token"),

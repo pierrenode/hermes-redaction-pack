@@ -50,6 +50,8 @@ def test_samples_match_whole(pattern):
     "hvb.batch and hvs.service are Vault token types",
     "api_org_settings_page",
     "lsv2_pt_ and lsv2_sk_ are LangSmith prefixes; pcsk_ is Pinecone's; wandb_v1_ is W&B's",
+    "dckr_pat_ and dckr_oat_ are Docker Hub prefixes; figd_ and figp_ are Figma's; sbp_ is Supabase's",
+    "set TS_AUTHKEY=tskey-auth-XXXX-YYYY, see tskey-api- and tskey-client- in the Tailscale docs",
 ])
 def test_prose_with_vendor_prefixes_is_untouched(pack, text):
     assert _matcher(pack.patterns.PATTERNS).search(text) is None
@@ -58,6 +60,13 @@ def test_prose_with_vendor_prefixes_is_untouched(pack, text):
 def test_longer_run_is_not_a_partial_match(pack):
     # Fixed-length formats stay anchored: a 33-hex run after shpat_ is not a Shopify token.
     assert _matcher(pack.patterns.PATTERNS).search("shpat_" + "a" * 33) is None
+    assert _matcher(pack.patterns.PATTERNS).search("dckr_pat_" + "a" * 28) is None
+    assert _matcher(pack.patterns.PATTERNS).search("sbp_" + "a" * 41) is None
+
+
+def test_supabase_token_body_is_hex(pack):
+    # The Supabase CLI accepts only lowercase hex after the prefix.
+    assert _matcher(pack.patterns.PATTERNS).search("sbp_" + "g" * 40) is None
 
 
 def test_manifest_counts_the_formats(pack):
