@@ -11,7 +11,9 @@ in ``(?<![A-Za-z0-9_-])(...)(?![A-Za-z0-9_-])``, so each pattern here:
 * spells out case with character classes instead of ``(?i)``.
 
 ``source`` names where the format comes from: a gitleaks rule id
-(https://github.com/gitleaks/gitleaks, MIT) or the vendor's own documentation.
+(https://github.com/gitleaks/gitleaks, MIT), a TruffleHog detector
+(https://github.com/trufflesecurity/trufflehog, pkg/detectors/<name>) or the vendor's own
+documentation.
 """
 
 from __future__ import annotations
@@ -86,10 +88,19 @@ FORMATS: tuple[TokenFormat, ...] = (
     TokenFormat("PlanetScale", "service token, OAuth token and password",
                 r"pscale_(?:tkn|oauth|pw)_[A-Za-z0-9_.=-]{32,64}",
                 "gitleaks:planetscale-api-token, planetscale-oauth-token, planetscale-password"),
-    # Model platforms
+    # Model and ML platforms
     TokenFormat("Hugging Face", "organization API token",
                 r"api_org_[A-Za-z]{34}",
                 "gitleaks:huggingface-organization-api-token"),
+    TokenFormat("LangSmith", "personal access token and service key",
+                r"lsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10}",
+                "trufflehog:langsmith; prefixes per https://docs.langchain.com/langsmith/create-account-api-key"),
+    TokenFormat("Pinecone", "API key",
+                r"pcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}",
+                "trufflehog:pinecone"),
+    TokenFormat("Weights & Biases", "API key (v1 format)",
+                r"wandb_v1_[A-Za-z0-9]{27}_[A-Za-z0-9]{49}",
+                "trufflehog:weightsandbiases/v2"),
     # Observability
     TokenFormat("Grafana", "Cloud API token",
                 r"glc_[A-Za-z0-9+/]{32,400}={0,3}",

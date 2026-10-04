@@ -75,6 +75,14 @@ def _samples() -> dict[str, list[str]]:
         r"pscale_(?:tkn|oauth|pw)_[A-Za-z0-9_.=-]{32,64}":
             [f"pscale_{kind}_" + fill(ALNUM, 43, i) for i, kind in enumerate(("tkn", "oauth", "pw"))],
         r"api_org_[A-Za-z]{34}": ["api_org_" + fill(LETTERS, 34)],
+        r"lsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10}":
+            ["lsv2_pt_" + fill(HEX, 32) + "_" + fill(HEX, 10, 1),
+             "lsv2_sk_" + fill(HEX, 32, 2) + "_" + fill(HEX, 10, 3)],
+        r"pcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}":
+            ["pcsk_" + fill(ALNUM, 5) + "_" + fill(ALNUM, 63, 1),
+             "pcsk_" + fill(ALNUM, 6, 2) + "_" + fill(ALNUM, 63, 3)],
+        r"wandb_v1_[A-Za-z0-9]{27}_[A-Za-z0-9]{49}":
+            ["wandb_v1_" + fill(ALNUM, 27) + "_" + fill(ALNUM, 49, 1)],
         r"glc_[A-Za-z0-9+/]{32,400}={0,3}": ["glc_" + fill(BASE64, 120) + "="],
         r"glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}": ["glsa_" + fill(ALNUM, 32) + "_" + fill(HEX, 8)],
         r"sntryu_[a-f0-9]{64}": ["sntryu_" + fill(HEX, 64)],

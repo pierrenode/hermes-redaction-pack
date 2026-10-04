@@ -1,8 +1,8 @@
 # redaction-pack
 
-A Hermes plugin that teaches the built-in secret redactor 42 more vendor
-credential formats: HashiCorp Vault, Doppler, Amazon Bedrock, Grafana, Sentry,
-Shopify, Postman, Databricks and others. It registers regexes and
+A Hermes plugin that teaches the built-in secret redactor 45 more vendor
+credential formats: HashiCorp Vault, Doppler, Amazon Bedrock, LangSmith,
+Pinecone, Grafana, Sentry, Shopify, Postman, Databricks and others. It registers regexes and
 nothing else.
 
 ## Why
@@ -67,6 +67,9 @@ these formats as well as the built-in ones.
 | Databricks | personal access token | `dapi[a-f0-9]{32}(?:-[0-9])?` | gitleaks |
 | PlanetScale | service token, OAuth token and password | `pscale_(?:tkn\|oauth\|pw)_[A-Za-z0-9_.=-]{32,64}` | gitleaks |
 | Hugging Face | organization API token | `api_org_[A-Za-z]{34}` | gitleaks |
+| LangSmith | personal access token and service key | `lsv2_(?:pt\|sk)_[a-f0-9]{32}_[a-f0-9]{10}` | trufflehog |
+| Pinecone | API key | `pcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}` | trufflehog |
+| Weights & Biases | API key (v1 format) | `wandb_v1_[A-Za-z0-9]{27}_[A-Za-z0-9]{49}` | trufflehog |
 | Grafana | Cloud API token | `glc_[A-Za-z0-9+/]{32,400}={0,3}` | gitleaks |
 | Grafana | service account token | `glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}` | gitleaks |
 | Sentry | user auth token | `sntryu_[a-f0-9]{64}` | gitleaks |
@@ -93,7 +96,10 @@ these formats as well as the built-in ones.
 "gitleaks" means the format follows the rule of that name in
 [gitleaks](https://github.com/gitleaks/gitleaks) (MIT); `patterns.py` gives the
 rule id for each entry. Doppler's formats are the ones Doppler publishes in
-[Auth Token Formats](https://docs.doppler.com/reference/auth-token-formats). Patterns are rewritten for Hermes's matcher: explicit
+[Auth Token Formats](https://docs.doppler.com/reference/auth-token-formats).
+"trufflehog" means the format follows that
+[TruffleHog](https://github.com/trufflesecurity/trufflehog) detector
+(`pkg/detectors/<name>`). Patterns are rewritten for Hermes's matcher: explicit
 character classes instead of `(?i)`, no capturing groups, no top-level `|`.
 
 ### Left out on purpose

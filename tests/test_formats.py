@@ -49,6 +49,7 @@ def test_samples_match_whole(pattern):
     "NRAK-12 is a ticket id",
     "hvb.batch and hvs.service are Vault token types",
     "api_org_settings_page",
+    "lsv2_pt_ and lsv2_sk_ are LangSmith prefixes; pcsk_ is Pinecone's; wandb_v1_ is W&B's",
 ])
 def test_prose_with_vendor_prefixes_is_untouched(pack, text):
     assert _matcher(pack.patterns.PATTERNS).search(text) is None
