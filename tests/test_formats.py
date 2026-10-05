@@ -52,6 +52,7 @@ def test_samples_match_whole(pattern):
     "lsv2_pt_ and lsv2_sk_ are LangSmith prefixes; pcsk_ is Pinecone's; wandb_v1_ is W&B's",
     "dckr_pat_ and dckr_oat_ are Docker Hub prefixes; figd_ and figp_ are Figma's; sbp_ is Supabase's",
     "set TS_AUTHKEY=tskey-auth-XXXX-YYYY, see tskey-api- and tskey-client- in the Tailscale docs",
+    "AKCp keys and cmVmdGtu reference tokens come from JFrog Artifactory",
 ])
 def test_prose_with_vendor_prefixes_is_untouched(pack, text):
     assert _matcher(pack.patterns.PATTERNS).search(text) is None
@@ -62,6 +63,10 @@ def test_longer_run_is_not_a_partial_match(pack):
     assert _matcher(pack.patterns.PATTERNS).search("shpat_" + "a" * 33) is None
     assert _matcher(pack.patterns.PATTERNS).search("dckr_pat_" + "a" * 28) is None
     assert _matcher(pack.patterns.PATTERNS).search("sbp_" + "a" * 41) is None
+    assert _matcher(pack.patterns.PATTERNS).search("AKCp" + "a" * 70) is None
+    assert _matcher(pack.patterns.PATTERNS).search("cmVmdGtu" + "a" * 57) is None
+    # Artifactory reference tokens are always 64 characters: a shorter run is not one either.
+    assert _matcher(pack.patterns.PATTERNS).search("cmVmdGtu" + "a" * 55) is None
 
 
 def test_supabase_token_body_is_hex(pack):

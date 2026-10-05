@@ -107,6 +107,8 @@ def _samples() -> dict[str, list[str]]:
         r"rdme_[a-z0-9]{70}": ["rdme_" + fill(LOWER_ALNUM, 70)],
         r"rubygems_[a-f0-9]{48}": ["rubygems_" + fill(HEX, 48)],
         r"CLOJARS_[A-Za-z0-9]{60}": ["CLOJARS_" + fill(ALNUM, 60)],
+        r"AKCp[A-Za-z0-9]{69}": ["AKCp" + fill(ALNUM, 69)],
+        r"cmVmdGtu[A-Za-z0-9]{56}": ["cmVmdGtu" + fill(ALNUM, 56)],
         r"tfp_[A-Za-z0-9_.=-]{59}": ["tfp_" + fill(ALNUM, 59)],
         r"fio-u-[A-Za-z0-9_=-]{64}": ["fio-u-" + fill(URLSAFE, 64)],
         r"dckr_pat_[A-Za-z0-9_-]{27}": ["dckr_pat_" + fill(ALNUM, 13) + "-_" + fill(ALNUM, 12, 1)],

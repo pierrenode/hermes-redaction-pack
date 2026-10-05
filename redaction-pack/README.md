@@ -1,9 +1,9 @@
 # redaction-pack
 
-A Hermes plugin that teaches the built-in secret redactor 51 more vendor
+A Hermes plugin that teaches the built-in secret redactor 53 more vendor
 credential formats: HashiCorp Vault, Doppler, Amazon Bedrock, Supabase,
-Tailscale, Docker Hub, LangSmith, Pinecone, Grafana, Sentry, Shopify, Postman,
-Databricks and others. It registers regexes and nothing else.
+Tailscale, Docker Hub, JFrog Artifactory, LangSmith, Pinecone, Grafana, Sentry,
+Shopify, Postman, Databricks and others. It registers regexes and nothing else.
 
 ## Why
 
@@ -85,6 +85,8 @@ these formats as well as the built-in ones.
 | ReadMe | API key | `rdme_[a-z0-9]{70}` | gitleaks |
 | RubyGems | API key | `rubygems_[a-f0-9]{48}` | gitleaks |
 | Clojars | deploy token | `CLOJARS_[A-Za-z0-9]{60}` | gitleaks |
+| JFrog Artifactory | API key | `AKCp[A-Za-z0-9]{69}` | gitleaks |
+| JFrog Artifactory | reference token | `cmVmdGtu[A-Za-z0-9]{56}` | trufflehog |
 | Typeform | personal access token | `tfp_[A-Za-z0-9_.=-]{59}` | gitleaks |
 | Frame.io | developer token | `fio-u-[A-Za-z0-9_=-]{64}` | gitleaks |
 | Docker Hub | personal access token | `dckr_pat_[A-Za-z0-9_-]{27}` | trufflehog |
@@ -126,7 +128,7 @@ character classes instead of `(?i)`, no capturing groups, no top-level `|`.
   API keys have a documented prefix but no published length or alphabet, so a
   pattern would be a guess.
 - **Formats without a distinctive literal prefix** (Terraform Cloud, Mailgun
-  `key-`, Airtable `pat`). Hermes needs a literal prefix to gate each pattern
+  `key-`, Airtable `pat`, Resend `re_`). Hermes needs a literal prefix to gate each pattern
   cheaply, and a short common one would run the full matcher on most lines.
 
 ## Security and footprint
