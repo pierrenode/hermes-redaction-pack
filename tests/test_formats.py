@@ -53,6 +53,10 @@ def test_samples_match_whole(pattern):
     "dckr_pat_ and dckr_oat_ are Docker Hub prefixes; figd_ and figp_ are Figma's; sbp_ is Supabase's",
     "set TS_AUTHKEY=tskey-auth-XXXX-YYYY, see tskey-api- and tskey-client- in the Tailscale docs",
     "AKCp keys and cmVmdGtu reference tokens come from JFrog Artifactory",
+    "ATATT and ATCTT3xFfG are Atlassian prefixes; pat-na1- is HubSpot's; phx_ is PostHog's; cfk_ is Cloudflare's",
+    "CCIPAT_, bkua_, CFPAT-, BBDC-, sqco_, slk_, rootly_ and apify_api_ are token prefixes",
+    "FLWSECK- and FLWSECK_TEST- are Flutterwave's; p8e- is Adobe's; NRIQ- is New Relic's; ramp_sec_ is Ramp's",
+    "see ATATT3xFfGF0-token-docs and pat-na1-docs for details",
 ])
 def test_prose_with_vendor_prefixes_is_untouched(pack, text):
     assert _matcher(pack.patterns.PATTERNS).search(text) is None
@@ -67,6 +71,48 @@ def test_longer_run_is_not_a_partial_match(pack):
     assert _matcher(pack.patterns.PATTERNS).search("cmVmdGtu" + "a" * 57) is None
     # Artifactory reference tokens are always 64 characters: a shorter run is not one either.
     assert _matcher(pack.patterns.PATTERNS).search("cmVmdGtu" + "a" * 55) is None
+    assert _matcher(pack.patterns.PATTERNS).search("rootly_" + "a" * 65) is None
+    assert _matcher(pack.patterns.PATTERNS).search("phx_" + "a" * 49) is None
+    assert _matcher(pack.patterns.PATTERNS).search("BBDC-" + "a" * 51) is None
+    assert _matcher(pack.patterns.PATTERNS).search("FLWSECK-" + "a" * 32 + "-Y") is None
+
+
+def test_bodies_keep_their_alphabet(pack):
+    m = _matcher(pack.patterns.PATTERNS)
+    # Cloudflare's cfk_ keys end in 8 hex characters; Buildkite's are lowercase; Rootly's and
+    # Sourcegraph Cody's are hex; Flutterwave test secrets use a-h and digits only.
+    assert m.search("cfk_" + "a" * 40 + "g" * 8) is None
+    assert m.search("bkua_" + "A" * 40) is None
+    assert m.search("rootly_" + "g" * 64) is None
+    assert m.search("slk_" + "g" * 64) is None
+    assert m.search("FLWSECK_TEST-" + "z" * 32 + "-X") is None
+    # Atlassian tokens end in "=" and an 8-character checksum.
+    assert m.search("ATATT3xFfGF0" + "a" * 180) is None
+    assert m.search("ATCTT3xFfGN0" + "a" * 180) is None
+
+
+@pytest.mark.parametrize("token", [
+    # One body character more than the format allows, inserted where the fixed-length run is.
+    "cfk_" + "a" * 41 + "0" * 8,
+    "NRIQ-" + "a" * 26,
+    "ATATT3xFfGF0" + "a" * 100 + "=" + "a" * 9,
+    "ATCTT3xFfGN0" + "a" * 100 + "=" + "a" * 9,
+    "CCIPAT_" + "a" * 23 + "_" + "0" * 40,
+    "CCIPAT_" + "a" * 22 + "_" + "0" * 41,
+    "bkua_" + "a" * 41,
+    "sqco_" + "a" * 60,
+    "slk_" + "0" * 65,
+    "CFPAT-" + "a" * 44,
+    "apify_api_" + "a" * 37,
+    "p8e-" + "a" * 33,
+    "pat-na1-" + "a" * 9 + "-aaaa-aaaa-aaaa-" + "a" * 12,
+    "pat-eu1-" + "a" * 8 + "-aaaa-aaaa-aaaa-" + "a" * 13,
+    "FLWSECK-" + "a" * 33 + "-X",
+    "FLWSECK_TEST-" + "a" * 33 + "-X",
+    "ramp_sec_" + "a" * 49,
+])
+def test_one_character_too_many_is_not_a_token(pack, token):
+    assert _matcher(pack.patterns.PATTERNS).search(token) is None
 
 
 def test_supabase_token_body_is_hex(pack):

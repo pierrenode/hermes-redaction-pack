@@ -1,9 +1,9 @@
 # redaction-pack
 
-A Hermes plugin that teaches the built-in secret redactor 53 more vendor
-credential formats: HashiCorp Vault, Doppler, Amazon Bedrock, Supabase,
-Tailscale, Docker Hub, JFrog Artifactory, LangSmith, Pinecone, Grafana, Sentry,
-Shopify, Postman, Databricks and others. It registers regexes and nothing else.
+A Hermes plugin that teaches the built-in secret redactor 71 more vendor
+credential formats: HashiCorp Vault, Doppler, Amazon Bedrock, Atlassian,
+Cloudflare, Supabase, Tailscale, Docker Hub, JFrog Artifactory, CircleCI,
+HubSpot, PostHog, LangSmith, Pinecone, Grafana, Sentry, Shopify and others. It registers regexes and nothing else.
 
 ## Why
 
@@ -62,6 +62,7 @@ these formats as well as the built-in ones.
 | Heroku | API key | `HRKU-AA[A-Za-z0-9_-]{58}` | gitleaks |
 | OpenShift | user token | `sha256~[A-Za-z0-9_-]{43}` | gitleaks |
 | Scalingo | API token | `tk-us-[A-Za-z0-9_-]{48}` | gitleaks |
+| Cloudflare | global API key (cfk_ format) | `cfk_[A-Za-z0-9]{40}[a-f0-9]{8}` | trufflehog |
 | Pulumi | access token | `pul-[a-f0-9]{40}` | gitleaks |
 | Infracost | API key | `ico-[A-Za-z0-9]{32}` | gitleaks |
 | Databricks | personal access token | `dapi[a-f0-9]{32}(?:-[0-9])?` | gitleaks |
@@ -79,6 +80,9 @@ these formats as well as the built-in ones.
 | Dynatrace | API token | `dt0c01\.[A-Za-z0-9]{24}\.[A-Za-z0-9]{64}` | gitleaks |
 | New Relic | user API key | `NRAK-[A-Za-z0-9]{27}` | gitleaks |
 | New Relic | insert key | `NRII-[A-Za-z0-9_-]{32}` | gitleaks |
+| New Relic | Insights query key | `NRIQ-[A-Za-z0-9_-]{25}` | trufflehog |
+| PostHog | personal API key | `phx_[A-Za-z0-9_]{43,48}` | trufflehog |
+| Rootly | API key | `rootly_[a-f0-9]{64}` | trufflehog |
 | Postman | API key | `PMAK-[a-fA-F0-9]{24}-[a-fA-F0-9]{34}` | gitleaks |
 | Sourcegraph | access token | `sgp_(?:[a-fA-F0-9]{16}_\|local_)?[a-fA-F0-9]{40}` | gitleaks |
 | Prefect | API key | `pnu_[A-Za-z0-9]{36}` | gitleaks |
@@ -94,12 +98,26 @@ these formats as well as the built-in ones.
 | Figma | personal access token | `figd_[A-Za-z0-9_-]{40}` | trufflehog |
 | Figma | personal access token (figp_ format) | `figp_[A-Za-z0-9_=-]{40,54}` | trufflehog |
 | Slack | app configuration refresh token | `xoxe-[0-9]-[A-Za-z0-9]{146}` | gitleaks |
+| Atlassian | API token (Jira, Confluence) | `ATATT[A-Za-z0-9+/=_-]+=[A-Za-z0-9]{8}` | trufflehog |
+| Atlassian | organization admin API key | `ATCTT3xFfG[A-Za-z0-9+/=_-]+=[A-Za-z0-9]{8}` | trufflehog |
+| Bitbucket Data Center | HTTP access token | `BBDC-[A-Za-z0-9+/@_-]{40,50}` | trufflehog |
+| CircleCI | personal API token | `CCIPAT_[A-Za-z0-9]{22}_[a-fA-F0-9]{40}` | trufflehog |
+| Buildkite | user API access token | `bkua_[a-z0-9]{40}` | trufflehog |
+| SonarCloud | token | `sqco_[A-Za-z0-9]{59}` | trufflehog |
+| Sourcegraph | Cody gateway access token | `slk_[a-f0-9]{64}` | trufflehog |
+| Contentful | personal access token | `CFPAT-[A-Za-z0-9_-]{43}` | trufflehog |
+| Apify | API token | `apify_api_[A-Za-z0-9]{36}` | trufflehog |
+| Adobe | client secret | `p8e-[A-Za-z0-9]{32}` | gitleaks |
 | Shopify | access tokens and shared secret | `shp(?:at\|ca\|pa\|ss)_[a-fA-F0-9]{32}` | gitleaks |
 | Square | access token | `sq0atp-[A-Za-z0-9_-]{22,60}` | gitleaks |
 | Shippo | API token | `shippo_(?:live\|test)_[a-fA-F0-9]{40}` | gitleaks |
 | Duffel | API token | `duffel_(?:test\|live)_[A-Za-z0-9_=-]{43}` | gitleaks |
 | EasyPost | production and test API keys | `EZ[AT]K[A-Za-z0-9]{54}` | gitleaks |
 | Brevo | API key | `xkeysib-[a-f0-9]{64}-[A-Za-z0-9]{16}` | gitleaks |
+| HubSpot | private app access token | `pat-(?:na\|eu)1-[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}` | trufflehog |
+| Flutterwave | live secret key | `FLWSECK-[0-9a-z]{32}-X` | trufflehog |
+| Flutterwave | test secret key | `FLWSECK_TEST-[A-Ha-h0-9]{32}-X` | gitleaks |
+| Ramp | API client secret | `ramp_sec_[A-Za-z0-9]{48}` | trufflehog |
 
 "gitleaks" means the format follows the rule of that name in
 [gitleaks](https://github.com/gitleaks/gitleaks) (MIT); `patterns.py` gives the
@@ -130,6 +148,10 @@ character classes instead of `(?i)`, no capturing groups, no top-level `|`.
 - **Formats without a distinctive literal prefix** (Terraform Cloud, Mailgun
   `key-`, Airtable `pat`, Resend `re_`). Hermes needs a literal prefix to gate each pattern
   cheaply, and a short common one would run the full matcher on most lines.
+  ClickHouse Cloud's `4b1d` prefix is left out for the same reason: it reads as hex
+  and would gate on hashes. Salesforce refresh tokens are out because the only
+  source matches their `5AEP861` prefix case-insensitively and none pins down the one
+  spelling a literal prefix gate needs.
 
 ## Security and footprint
 

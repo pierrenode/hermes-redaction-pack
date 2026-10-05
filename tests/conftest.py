@@ -69,6 +69,8 @@ def _samples() -> dict[str, list[str]]:
         r"HRKU-AA[A-Za-z0-9_-]{58}": ["HRKU-AA" + fill(URLSAFE, 58)],
         r"sha256~[A-Za-z0-9_-]{43}": ["sha256~" + fill(URLSAFE, 43)],
         r"tk-us-[A-Za-z0-9_-]{48}": ["tk-us-" + fill(URLSAFE, 48)],
+        r"cfk_[A-Za-z0-9]{40}[a-f0-9]{8}":
+            ["cfk_" + fill(ALNUM, 40) + fill(HEX, 8, 1)],
         r"pul-[a-f0-9]{40}": ["pul-" + fill(HEX, 40)],
         r"ico-[A-Za-z0-9]{32}": ["ico-" + fill(ALNUM, 32)],
         r"dapi[a-f0-9]{32}(?:-[0-9])?": ["dapi" + fill(HEX, 32), "dapi" + fill(HEX, 32, 1) + "-2"],
@@ -98,6 +100,12 @@ def _samples() -> dict[str, list[str]]:
             ["dt0c01." + fill(UPPER_ALNUM, 24) + "." + fill(ALNUM, 64)],
         r"NRAK-[A-Za-z0-9]{27}": ["NRAK-" + fill(UPPER_ALNUM, 27)],
         r"NRII-[A-Za-z0-9_-]{32}": ["NRII-" + fill(URLSAFE, 32)],
+        r"NRIQ-[A-Za-z0-9_-]{25}":
+            ["NRIQ-" + fill(ALNUM, 11) + "_-" + fill(ALNUM, 12, 1)],
+        r"phx_[A-Za-z0-9_]{43,48}":
+            ["phx_" + fill(ALNUM, 21) + "_" + fill(ALNUM, 21, 1), "phx_" + fill(ALNUM, 48, 2)],
+        r"rootly_[a-f0-9]{64}":
+            ["rootly_" + fill(HEX, 64)],
         r"PMAK-[a-fA-F0-9]{24}-[a-fA-F0-9]{34}": ["PMAK-" + fill(HEX, 24) + "-" + fill(HEX, 34, 1)],
         r"sgp_(?:[a-fA-F0-9]{16}_|local_)?[a-fA-F0-9]{40}":
             ["sgp_" + fill(HEX, 16) + "_" + fill(HEX, 40, 1),
@@ -116,6 +124,26 @@ def _samples() -> dict[str, list[str]]:
         r"figd_[A-Za-z0-9_-]{40}": ["figd_" + fill(ALNUM, 19) + "-_" + fill(ALNUM, 19, 1)],
         r"figp_[A-Za-z0-9_=-]{40,54}": ["figp_" + fill(ALNUM, 42), "figp_" + fill(URLSAFE, 52, 1) + "=="],
         r"xoxe-[0-9]-[A-Za-z0-9]{146}": ["xoxe-1-" + fill(ALNUM, 146)],
+        r"ATATT[A-Za-z0-9+/=_-]+=[A-Za-z0-9]{8}":
+            ["ATATT3xFfGF0" + fill(ALNUM, 80) + "+/_-=" + fill(ALNUM, 80, 1) + "=" + fill(ALNUM, 8, 2)],
+        r"ATCTT3xFfG[A-Za-z0-9+/=_-]+=[A-Za-z0-9]{8}":
+            ["ATCTT3xFfGN0" + fill(ALNUM, 80, 3) + "_-+/=" + fill(ALNUM, 80, 4) + "=" + fill(ALNUM, 8, 5)],
+        r"BBDC-[A-Za-z0-9+/@_-]{40,50}":
+            ["BBDC-" + fill(ALNUM, 20) + "+/@_-" + fill(ALNUM, 19, 1), "BBDC-" + fill(ALNUM, 40, 2)],
+        r"CCIPAT_[A-Za-z0-9]{22}_[a-fA-F0-9]{40}":
+            ["CCIPAT_" + fill(ALNUM, 22) + "_" + fill(HEX, 40, 1)],
+        r"bkua_[a-z0-9]{40}":
+            ["bkua_" + fill(LOWER_ALNUM, 40)],
+        r"sqco_[A-Za-z0-9]{59}":
+            ["sqco_" + fill(ALNUM, 59)],
+        r"slk_[a-f0-9]{64}":
+            ["slk_" + fill(HEX, 64)],
+        r"CFPAT-[A-Za-z0-9_-]{43}":
+            ["CFPAT-" + fill(ALNUM, 20) + "_-" + fill(ALNUM, 21, 1)],
+        r"apify_api_[A-Za-z0-9]{36}":
+            ["apify_api_" + fill(ALNUM, 36)],
+        r"p8e-[A-Za-z0-9]{32}":
+            ["p8e-" + fill(ALNUM, 32)],
         r"shp(?:at|ca|pa|ss)_[a-fA-F0-9]{32}":
             [f"shp{kind}_" + fill(HEX, 32, i) for i, kind in enumerate(("at", "ca", "pa", "ss"))],
         r"sq0atp-[A-Za-z0-9_-]{22,60}": ["sq0atp-" + fill(URLSAFE, 22)],
@@ -125,6 +153,14 @@ def _samples() -> dict[str, list[str]]:
             ["duffel_test_" + fill(ALNUM, 43), "duffel_live_" + fill(ALNUM, 43, 1)],
         r"EZ[AT]K[A-Za-z0-9]{54}": ["EZAK" + fill(ALNUM, 54), "EZTK" + fill(ALNUM, 54, 1)],
         r"xkeysib-[a-f0-9]{64}-[A-Za-z0-9]{16}": ["xkeysib-" + fill(HEX, 64) + "-" + fill(ALNUM, 16, 1)],
+        r"pat-(?:na|eu)1-[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}":
+            [f"pat-{region}1-" + "-".join(fill(ALNUM, n, i + j) for j, n in enumerate((8, 4, 4, 4, 12))) for i, region in enumerate(("na", "eu"))],
+        r"FLWSECK-[0-9a-z]{32}-X":
+            ["FLWSECK-" + fill(LOWER_ALNUM, 32) + "-X"],
+        r"FLWSECK_TEST-[A-Ha-h0-9]{32}-X":
+            ["FLWSECK_TEST-" + fill("0123456789abcdefghABCDEFGH", 32) + "-X"],
+        r"ramp_sec_[A-Za-z0-9]{48}":
+            ["ramp_sec_" + fill(ALNUM, 48)],
     }
     return s
 
